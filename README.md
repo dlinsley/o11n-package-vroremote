@@ -17,4 +17,4 @@ Currently this package has workflows to:
 It also has a collection of actions to use for dropdowns of the cached remote vCenter inventory data.
 
 ## Try it out
-Latest built packages can be found at [releases](https://github.com/dlinsley/o11n-package-vroremote/releases)Crea
+Latest built packages can be found at [releases](https://github.com/dlinsley/o11n-package-vroremote/releases)
