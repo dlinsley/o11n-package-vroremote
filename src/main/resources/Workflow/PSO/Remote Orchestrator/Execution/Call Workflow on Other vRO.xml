@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item4" object-name="workflow:name=generic" id="0656a2cf-bcb7-4534-8eaf-a80b1dc1f070" version="0.0.6" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Call Workflow on Other vRO]]></display-name>
+  <description><![CDATA[Currently only supports string types for workflow inputs/outputs.]]></description>
+  <position y="45.40909090909091" x="465.0"></position>
+  <input>
+    <param name="workflowId" type="string"></param>
+    <param name="workflowObj" type="Workflow"></param>
+    <param name="parameters" type="Properties"></param>
+    <param name="restHost" type="REST:RESTHost">
+      <description><![CDATA[The created RESTHost]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="outputParameters" type="Properties"></param>
+    <param name="state" type="string">
+      <description><![CDATA[Final state of workflow:  complete, failed, canceled.]]></description>
+    </param>
+  </output>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="retries" type="number" read-only="false">
+    <value encoded="n"><![CDATA[20.0]]></value>
+  </attrib>
+  <workflow-note x="380.0" y="118.18181818181816" w="460.0" h="72.0" color="ffbfdfff">
+    <description><![CDATA[Exception  Cleanup Path]]></description>
+  </workflow-note>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="944.5"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item0" catch-name="item5" throw-bind-name="errorCode" type="task">
+    <display-name><![CDATA[Execute and wait]]></display-name>
+    <script encoded="false"><![CDATA[if (workflowObj != null) {
+	workflowId = workflowObj.id;
+}
+
+var paramKeys = parameters.keys;
+
+var url = "/vco/api/workflows/"+workflowId+"/executions";
+var retryCount = 0;
+var bodyJS = {};
+bodyJS.parameters = [];
+
+for (var i in paramKeys) {
+	var param = {};
+	param.scope = "local";
+	param.name = paramKeys[i];
+	if (param.name.toLowerCase().indexOf('password') > -1) {
+		param.type = 'SecureString';
+	} else {
+		param.type = 'string';
+	}
+	
+	param.value = {};
+	param.value.string = {};
+	param.value.string.value = parameters.get(paramKeys[i]);
+	bodyJS.parameters.push(param);
+}
+
+var body = JSON.stringify(bodyJS);
+
+//System.log(JSON.stringify(bodyJS,null,4));
+
+var request = restHost.createRequest("POST",url,body);
+request.contentType = "application/json";
+request.setHeader("Accept","application/json");
+
+var response = request.execute();
+
+//System.log(response.getAllHeaders().toSource());
+
+var responseHeaders = response.getAllHeaders();
+var location = responseHeaders.get("Location");
+if (location != null && location.length > 0 && response.statusCode < 300) {
+	System.log("Successfully launched workflow and determined workflow token");
+} else {
+	throw("Could not launch workflow on remote orchestrator.  Status Code: "+response.statusCode+" Response: "+response.statusCode);
+}
+
+//System.log(location);
+
+var locationParts = location.split("/");
+locationParts.shift();
+locationParts.shift();
+locationParts.shift();
+
+var tokenUrl = "/"+locationParts.join("/");
+
+//System.log(tokenUrl);
+var stillrunning = true;
+var status;
+var responseObj;
+while (stillrunning) {
+	System.sleep(2000);
+	var request = restHost.createRequest("GET",tokenUrl,null);
+	request.setHeader("Accept","application/json");
+	var response = request.execute();
+//	System.log(response.statusCode);
+	if (response.statusCode < 300) {
+		responseObj = JSON.parse(response.contentAsString);	
+		var state = responseObj.state;
+		if (state === "completed" || 
+			state === "failed" || 
+			state === "canceled") {
+				stillrunning = false;
+		}
+	} else {
+		if (retryCount < retries) {
+			System.warn("Received unexpected status code: "+response.statusCode+" retrying after 60 seconds.");
+			System.sleep(60000);
+			retryCount++;
+		} else {
+			throw("Retry attempts exceeded");		
+		}
+	}
+}
+
+//System.log(JSON.stringify(responseObj,null,4));
+System.log("Remote workflow final state: "+state);
+
+if (responseObj.state == 'failed') {
+	throw('Remote Workflow failed with exception: '+  responseObj['content-exception']);
+}
+
+outputParameters = new Properties();
+outputParametersObj = responseObj["output-parameters"];
+
+for (var i in outputParametersObj) {
+	if (outputParametersObj[i].type == "string") {
+		outputParameters.put(outputParametersObj[i].name,outputParametersObj[i].value.string.value);
+	}
+}]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="parameters" type="Properties" export-name="parameters"></bind>
+      <bind name="workflowId" type="string" export-name="workflowId"></bind>
+      <bind name="retries" type="number" export-name="retries"></bind>
+      <bind name="workflowObj" type="Workflow" export-name="workflowObj"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="outputParameters" type="Properties" export-name="outputParameters"></bind>
+      <bind name="state" type="string" export-name="state"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="624.5"></position>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item6" type="task">
+    <display-name><![CDATA[Log error]]></display-name>
+    <script encoded="false"><![CDATA[System.error(errorCode);
+]]></script>
+    <in-binding>
+      <bind name="errorCode" type="string" export-name="errorCode"></bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <position y="137.22727272727272" x="625.0"></position>
+  </workflow-item>
+  <workflow-item name="item6" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="127.22727272727272" x="504.5"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="parameters">
+      <desc><![CDATA[parameters]]></desc>
+    </p-param>
+    <p-param name="workflowId">
+      <desc><![CDATA[workflowId]]></desc>
+    </p-param>
+    <p-param name="restHost">
+      <desc><![CDATA[The created RESTHost]]></desc>
+    </p-param>
+    <p-param name="workflowObj">
+      <desc><![CDATA[workflowObj]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

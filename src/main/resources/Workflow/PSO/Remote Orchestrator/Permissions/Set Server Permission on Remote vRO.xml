@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="d0222a7b-7871-47df-89e4-77bc4b8f8cff" version="0.0.4" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Set Server Permission on Remote vRO]]></display-name>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="restHost" type="REST:RESTHost"></param>
+    <param name="group" type="string"></param>
+    <param name="groupDomain" type="string"></param>
+    <param name="viewRight" type="boolean"></param>
+    <param name="executeRight" type="boolean"></param>
+    <param name="inspectRight" type="boolean"></param>
+    <param name="editRight" type="boolean"></param>
+    <param name="adminRight" type="boolean"></param>
+  </input>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="384.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Set Permission]]></display-name>
+    <script encoded="false"><![CDATA[var rights = '';
+if (viewRight) rights = rights + 'r';
+if (executeRight) rights = rights + 'x';
+if (inspectRight) rights = rights + 'i';
+if (editRight) rights = rights + 'c';
+if (adminRight) rights = rights + 'a';
+
+var permObj = {};
+permObj.permission = {};
+permObj.permission.rights = rights;
+permObj.permission.principal = groupDomain+'\\'+group;
+
+var bodyObj = {};
+bodyObj.permissions = [permObj];
+
+//System.log(JSON.stringify(bodyObj,null,4));
+var req = restHost.createRequest('POST','/vco/api/server/permissions',JSON.stringify(bodyObj));
+req.contentType = 'application/json';
+req.setHeader('Accept','application/json');
+
+var response = req.execute();
+System.debug(response.statusCode);
+if (response.statusCode < 400) {
+	System.log('Successfully added Right for '+groupDomain+'\\'+group);
+} else {
+	throw response.contentAsString;
+}]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="group" type="string" export-name="group"></bind>
+      <bind name="groupDomain" type="string" export-name="groupDomain"></bind>
+      <bind name="viewRight" type="boolean" export-name="viewRight"></bind>
+      <bind name="executeRight" type="boolean" export-name="executeRight"></bind>
+      <bind name="inspectRight" type="boolean" export-name="inspectRight"></bind>
+      <bind name="editRight" type="boolean" export-name="editRight"></bind>
+      <bind name="adminRight" type="boolean" export-name="adminRight"></bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="restHost">
+      <desc><![CDATA[restHost]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="group">
+      <desc><![CDATA[group]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="groupDomain">
+      <desc><![CDATA[groupDomain]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="viewRight">
+      <desc><![CDATA[viewRight]]></desc>
+    </p-param>
+    <p-param name="executeRight">
+      <desc><![CDATA[executeRight]]></desc>
+    </p-param>
+    <p-param name="inspectRight">
+      <desc><![CDATA[inspectRight]]></desc>
+    </p-param>
+    <p-param name="editRight">
+      <desc><![CDATA[editRight]]></desc>
+    </p-param>
+    <p-param name="adminRight">
+      <desc><![CDATA[adminRight]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

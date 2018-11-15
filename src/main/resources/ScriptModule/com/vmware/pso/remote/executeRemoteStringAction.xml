@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="executeRemoteStringAction" result-type="string" api-version="6.0.0" id="afa015b7-aaae-47b8-9835-92c707966115" version="0.0.0" allowed-operations="vef">
+  <param n="vCenter" t="string"><![CDATA[]]></param>
+  <param n="actionModule" t="string"><![CDATA[]]></param>
+  <param n="actionName" t="string"><![CDATA[]]></param>
+  <param n="inputs" t="Properties"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var restHost = System.getModule("com.vmware.pso.remote").remoteVCenterVroRestHost(vCenter);
+var bodyObj = {};
+bodyObj.parameters = [];
+
+for each (var key in inputs.keys) {
+	var input = {};
+	input.type = 'string';
+	input.name = key;
+	input.value = {};
+	input.value.string = {};
+	input.value.string.value = inputs.get(key);
+	bodyObj.parameters.push(input); 
+}
+
+System.log(JSON.stringify(bodyObj,null,4));
+
+var request = restHost.createRequest('POST','/vco/api/actions/'+actionModule+'/'+actionName+'/executions',JSON.stringify(bodyObj));
+request.contentType = "application/json";
+request.setHeader("Accept","application/json");
+
+var response = request.execute();
+var responseObj;
+if (response.statusCode < 400) {
+	responseObj = JSON.parse(response.contentAsString);
+} else {
+	throw response.contentAsString;
+}
+
+if (response.type == 'string') {
+	return response.value.string.value;
+}
+throw('Expected action to return string type.  Action returned type: '+responseObj.type);]]></script>
+</dunes-script-module>

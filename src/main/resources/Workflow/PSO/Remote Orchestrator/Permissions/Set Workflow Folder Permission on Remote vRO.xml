@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item4" object-name="workflow:name=generic" id="1f3938a9-2153-4fdf-a6ec-4298aeb48781" version="0.0.9" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Set Workflow Folder Permission on Remote vRO]]></display-name>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="restHost" type="REST:RESTHost">
+      <description><![CDATA[Remote vRO REST Host]]></description>
+    </param>
+    <param name="group" type="string">
+      <description><![CDATA[Group to set permission for]]></description>
+    </param>
+    <param name="groupDomain" type="string">
+      <description><![CDATA[Domain of group to set permission for]]></description>
+    </param>
+    <param name="workflowFolderPath" type="string">
+      <description><![CDATA[Target workflow folder for permission.  If workflow folder does not exist, it will be created.  Forward slash (/) delimited]]></description>
+    </param>
+    <param name="viewRight" type="boolean">
+      <description><![CDATA[The user can view the elements in the workflow, but cannot view the schema or scripting.]]></description>
+    </param>
+    <param name="inspectRight" type="boolean">
+      <description><![CDATA[The user can view the elements in the workflow, including the schema and scripting.]]></description>
+    </param>
+    <param name="executeRight" type="boolean">
+      <description><![CDATA[The user can run the workflow.]]></description>
+    </param>
+    <param name="editRight" type="boolean">
+      <description><![CDATA[The user can edit the workflow.]]></description>
+    </param>
+    <param name="adminRight" type="boolean">
+      <description><![CDATA[The user can set permissions on the workflow and has all other permissions.]]></description>
+    </param>
+  </input>
+  <attrib name="workflowCatId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="664.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Set Permission]]></display-name>
+    <script encoded="false"><![CDATA[var rights = '';
+if (viewRight) rights = rights + 'r';
+if (executeRight) rights = rights + 'x';
+if (inspectRight) rights = rights + 'i';
+if (editRight) rights = rights + 'c';
+if (adminRight) rights = rights + 'a';
+
+var permObj = {};
+permObj.permission = {};
+permObj.permission.rights = rights;
+permObj.permission.principal = groupDomain+'\\'+group;
+
+var bodyObj = {};
+bodyObj.permissions = [permObj];
+
+//System.log(JSON.stringify(bodyObj,null,4));
+var req = restHost.createRequest('POST','/vco/api/categories/'+workflowCatId+'/permissions',JSON.stringify(bodyObj));
+req.contentType = 'application/json';
+req.setHeader('Accept','application/json');
+
+var response = req.execute();
+System.debug(response.statusCode);
+if (response.statusCode < 400) {
+	System.log('Successfully added Right for '+groupDomain+'\\'+group);
+} else {
+	throw response.contentAsString;
+}]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="group" type="string" export-name="group"></bind>
+      <bind name="groupDomain" type="string" export-name="groupDomain"></bind>
+      <bind name="viewRight" type="boolean" export-name="viewRight"></bind>
+      <bind name="executeRight" type="boolean" export-name="executeRight"></bind>
+      <bind name="inspectRight" type="boolean" export-name="inspectRight"></bind>
+      <bind name="editRight" type="boolean" export-name="editRight"></bind>
+      <bind name="adminRight" type="boolean" export-name="adminRight"></bind>
+      <bind name="workflowCatId" type="string" export-name="workflowCatId"></bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <position y="55.40909090909091" x="484.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item1" type="custom-condition" alt-out-name="item5">
+    <display-name><![CDATA[Folder Exists?]]></display-name>
+    <script encoded="false"><![CDATA[if (workflowCatId == 'notfound') {
+	return false;
+}
+if (workflowCatId != null && workflowCatId.length > 0) {
+	return true;
+}
+return false;]]></script>
+    <in-binding>
+      <bind name="workflowCatId" type="string" export-name="workflowCatId"></bind>
+    </in-binding>
+    <position y="45.40909090909091" x="344.5"></position>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item1" type="link" linked-workflow-id="9f146e46-0594-46f3-9f12-1af18c472fb3">
+    <display-name><![CDATA[Create Workflow Folder]]></display-name>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost">
+        <description><![CDATA[REST host of remote vRO]]></description>
+      </bind>
+      <bind name="workflowFolderPath" type="string" export-name="workflowFolderPath">
+        <description><![CDATA[Workflow folder path.  Forward slash delimited.  No not include leading or trailing slashes ]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="newFolderId" type="string" export-name="workflowCatId"></bind>
+    </out-binding>
+    <description><![CDATA[Creates a workflow folder on the remote vRO]]></description>
+    <position y="119.04545454545453" x="344.5"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item3" type="task" script-module="com.vmware.pso.remote/remoteWorkflowFolderExists">
+    <display-name><![CDATA[remoteWorkflowFolderExists]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.remote").remoteWorkflowFolderExists(rest,path) ;]]></script>
+    <in-binding>
+      <bind name="rest" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="path" type="string" export-name="workflowFolderPath">
+        <description><![CDATA[Worflow Folder path from root delimited with /]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="workflowCatId"></bind>
+    </out-binding>
+    <description><![CDATA[Queries remote vRO if workflow folder (WorkflowCategory) exists.
+If it exists, returns the id of the respective WorkflowCategory
+If it does not exists, returns null.
+retries after 30 seconds for 503 errors
+Throws exception on unknown errors.]]></description>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="restHost">
+      <desc><![CDATA[Remote vRO REST Host]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="group">
+      <desc><![CDATA[Group to set permission for]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="groupDomain">
+      <desc><![CDATA[Domain of group to set permission for]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="workflowFolderPath">
+      <desc><![CDATA[Target workflow folder for permission.  If workflow folder does not exist, it will be created.  Forward slash (/) delimited]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="viewRight">
+      <desc><![CDATA[<b>View Right</b>
+The user can view the elements in the workflow, but cannot view the schema or scripting.]]></desc>
+    </p-param>
+    <p-param name="inspectRight">
+      <desc><![CDATA[<b>Inspect Right</b>
+The user can view the elements in the workflow, including the schema and scripting.]]></desc>
+    </p-param>
+    <p-param name="executeRight">
+      <desc><![CDATA[<b>Execute Right</b>
+The user can run the workflow.]]></desc>
+    </p-param>
+    <p-param name="editRight">
+      <desc><![CDATA[<b>Edit Right</b>
+The user can edit the workflow.]]></desc>
+    </p-param>
+    <p-param name="adminRight">
+      <desc><![CDATA[<b>Admin Right</b>
+The user can set permissions on the workflow and has all other permissions.]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

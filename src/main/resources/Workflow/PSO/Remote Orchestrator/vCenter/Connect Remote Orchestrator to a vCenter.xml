@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="9afb6690-c37a-4777-acda-4ec56dd0209d" version="0.0.2" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Connect Remote Orchestrator to a vCenter]]></display-name>
+  <description><![CDATA[Connects a remote vRO to a vCenter.
+
+Assumes default api port for vCenter.
+
+Assumes session per user authentication to vCenter.
+
+Accepts the vCenter certificate.]]></description>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="restHost" type="REST:RESTHost">
+      <description><![CDATA[REST Host of remote vRO]]></description>
+    </param>
+    <param name="vCenterHostname" type="string"></param>
+    <param name="vCenterSsoUsername" type="string"></param>
+    <param name="vCenterSsoPassword" type="SecureString"></param>
+  </input>
+  <attrib name="workflowObj" type="Workflow" read-only="false">
+    <value encoded="n"><![CDATA[dunes://service.dunes.ch/Workflow?id='5b65be19-4c19-45e1-9269-5c2903427e3f'&dunesName='Workflow']]></value>
+  </attrib>
+  <attrib name="parameters" type="Properties" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="outputParameters" type="Properties" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="state" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[Final state of workflow:  complete, failed, canceled.]]></description>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="844.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item2" type="task">
+    <display-name><![CDATA[prepare inputs]]></display-name>
+    <script encoded="false"><![CDATA[parameters = new Properties();
+parameters.put("vCenterHostname",vCenterHostname);
+parameters.put("vCenterSsoUsername",vCenterSsoUsername);
+parameters.put("vCenterSsoPassword",vCenterSsoPassword);]]></script>
+    <in-binding>
+      <bind name="vCenterHostname" type="string" export-name="vCenterHostname"></bind>
+      <bind name="vCenterSsoUsername" type="string" export-name="vCenterSsoUsername"></bind>
+      <bind name="vCenterSsoPassword" type="SecureString" export-name="vCenterSsoPassword"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="parameters" type="Properties" export-name="parameters"></bind>
+      <bind name="restHost" type="REST:RESTHost"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item3" type="link" linked-workflow-id="0656a2cf-bcb7-4534-8eaf-a80b1dc1f070">
+    <display-name><![CDATA[Call Workflow on Other vRO]]></display-name>
+    <in-binding>
+      <bind name="workflowId" type="string" explicitly-not-bound="true" export-name="NULL"></bind>
+      <bind name="workflowObj" type="Workflow" export-name="workflowObj"></bind>
+      <bind name="parameters" type="Properties" export-name="parameters"></bind>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost">
+        <description><![CDATA[The created RESTHost]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="outputParameters" type="Properties" export-name="outputParameters"></bind>
+      <bind name="state" type="string" export-name="state">
+        <description><![CDATA[Final state of workflow:  complete, failed, canceled.]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Currently only supports string types for workflow inputs/outputs.]]></description>
+    <position y="55.40909090909091" x="384.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item4" catch-name="item5" throw-bind-name="errorCode" type="task">
+    <display-name><![CDATA[check output]]></display-name>
+    <script encoded="false"><![CDATA[System.log("Final state: "+state);
+System.log("Output Parameters: \n"+JSON.stringify(outputParameters,null,4));]]></script>
+    <in-binding>
+      <bind name="outputParameters" type="Properties" export-name="outputParameters"></bind>
+      <bind name="state" type="string" export-name="state"></bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <position y="55.40909090909091" x="524.5"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item0" type="link" linked-workflow-id="fec0040c-afe5-4505-94ca-7482818b58d2">
+    <display-name><![CDATA[Update vCenter Inventory of Remote vRO]]></display-name>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost">
+        <description><![CDATA[The created RESTHost]]></description>
+      </bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <position y="55.40909090909091" x="664.5"></position>
+  </workflow-item>
+  <workflow-item name="item5" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="109.04545454545453" x="565.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="restHost">
+      <desc><![CDATA[REST host connected to remote vRO]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="vCenterHostname">
+      <desc><![CDATA[vCenter Hostname (FQDN)]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="vCenterSsoUsername">
+      <desc><![CDATA[vSphere SSO Admin Username (username@domain.tld)]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="vCenterSsoPassword">
+      <desc><![CDATA[vSphere SSO User Password]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+  </presentation>
+</workflow>

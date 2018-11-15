@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">PSO.Remote Orchestrator.Remote Helpers</entry>
+<entry key="name">Create Resource Pool</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">d5b5e72e-8f1f-47e6-ad72-26de48f863b2</entry>
+</properties>

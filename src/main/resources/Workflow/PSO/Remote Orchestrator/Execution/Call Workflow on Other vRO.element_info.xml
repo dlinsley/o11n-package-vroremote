@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">PSO.Remote Orchestrator.Execution</entry>
+<entry key="name">Call Workflow on Other vRO</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">0656a2cf-bcb7-4534-8eaf-a80b1dc1f070</entry>
+</properties>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="remoteVCenterVroRestHost" result-type="REST:RESTHost" api-version="6.0.0" id="37d2fd2b-2ff4-494b-9887-2a64e132623f" version="0.0.0" allowed-operations="vef">
+  <param n="vCenter" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[for each (hostId in RESTHostManager.getHosts()) {
+	var host = RESTHostManager.getHost(hostId);
+	if ("vCenterAccess" == Server.getCustomProperty(host,"remoteVRO") && Server.getCustomProperty(host,vCenter+"_clusters")) {
+		return host;
+	}
+}
+
+throw "could not determine RESTHost for remote vCenters vRO";]]></script>
+</dunes-script-module>

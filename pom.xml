@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <!--  Maybe you'd like to change this to point to your organization's groupId-->
+  <groupId>workflow-designer-exported</groupId>
+
+  <artifactId>com.vmware.pso.vroremote</artifactId>
+  <packaging>package</packaging>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <properties>
+    <keystoreLocation>package-signing-cert.jks</keystoreLocation>
+    <keystorePassword>password</keystorePassword>
+    <vco.version>7.4.0</vco.version>
+    <!-- change to vf for releases: it will lock the workflows -->
+    <allowedMask>vef</allowedMask>
+	<repoUrl>http://192.168.241.130:8280/vco-repo</repoUrl>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>added-by-archetype</id>
+      <name>This repo was added by the 'Expand to file system'</name>
+      <url>${repoUrl}</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>added-by-archetype</id>
+      <name>This repo was added by the 'Expand to file system'</name>
+      <url>${repoUrl}</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.vmware.o11n.mojo.pkg</groupId>
+        <artifactId>maven-o11n-package-plugin</artifactId>
+        <version>${vco.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <packageName>com.vmware.pso.vroremote</packageName>
+          <!-- Set the local path to the *.vmokeystore file used to sign the content -->
+          <keystoreLocation>${keystoreLocation}</keystoreLocation>
+          <keystorePassword>${keystorePassword}</keystorePassword>
+          <includes>
+            <include>**/*.element_info.xml</include>
+          </includes>
+          <packageFileName>${project.artifactId}-${project.version}</packageFileName>
+          <allowedMask>${allowedMask}</allowedMask>
+          <exportVersionHistory>false</exportVersionHistory>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+    <profiles>
+    <profile>
+      <id>concourseDistOut</id>
+      <build>
+          <directory>../dist</directory>
+      </build>
+    </profile>
+  </profiles>
+</project>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="10c45793-efbd-4eb8-9bc9-7aa99ae7a0ee" version="0.0.2" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Get All Folder Permissions on Remote vRO]]></display-name>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="restHost" type="REST:RESTHost">
+      <description><![CDATA[Remote vRO REST Host]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="allPerms" type="Properties"></param>
+  </output>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[Folder does not exist]]></value>
+  </attrib>
+  <attrib name="folderIDs" type="Properties" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="types" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[#{#string#WorkflowCategory#;#string#ScriptModuleCategory#;#string#ConfigurationElementCategory#;#string#ResourceElementCategory#}#]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="524.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Get Permission]]></display-name>
+    <script encoded="false"><![CDATA[var allPerms = new Properties();
+for each (var thisType in types) {
+	var catIds = folderIDs.get(thisType);
+	System.log('Checking '+ thisType+ ' types. Number of objects: '+catIds.length);
+	var thesePerms = new Properties();
+	for each (var catId in catIds) {
+
+		var permissions = new Properties();
+		var req = restHost.createRequest('GET','/vco/api/categories/'+catId+'/permissions');
+		req.contentType = 'application/json';
+		req.setHeader('Accept','application/json');
+
+		var response = req.execute();
+		System.debug(response.statusCode);
+		var responseObj;
+		if (response.statusCode < 400) {
+			responseObj = JSON.parse(response.contentAsString);
+		} else {
+			throw response.contentAsString;
+		}
+
+		for each (var perm in responseObj.permissions) {
+//		    System.log(JSON.stringify(perm,null,4));
+			System.log('Found Permission for: '+thisType+':'+catId); 
+			var principalParts = perm.permission.principal.split('\\');
+			permissions.put(principalParts[1]+'@'+principalParts[0],perm.permission.rights);
+		}
+		if (permissions.keys.length > 0) {
+			thesePerms.put(catId, permissions);
+		}
+	}
+	allPerms.put(thisType,thesePerms);
+}
+
+System.log(allPerms.toSource());
+System.log(JSON.stringify(allPerms, null,4));]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="folderIDs" type="Properties" export-name="folderIDs"></bind>
+      <bind name="types" type="Array/string" export-name="types"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="allPerms" type="Properties" export-name="allPerms"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="344.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item1" type="task">
+    <display-name><![CDATA[Get All Folders]]></display-name>
+    <script encoded="false"><![CDATA[folderIDs = new Properties();
+
+var req = restHost.createRequest('GET','/vco/api/categories');
+req.contentType = 'application/json';
+req.setHeader('Accept','application/json');
+
+var response = req.execute();
+System.debug(response.statusCode);
+var responseObj;
+if (response.statusCode < 400) {
+	responseObj = JSON.parse(response.contentAsString);
+} else {
+	throw response.contentAsString;
+}
+
+var links = responseObj.link;
+
+folderIDsWork = [];
+for each (var thisType in types) {
+	folderIDsWork[thisType] = [];
+}
+
+for each (var linkItem in links) {
+	var itemId;
+	var itemType;
+	for each (var attr in linkItem.attributes) { 
+		if (attr.name == 'id') {
+			 itemId = attr.value;
+		}
+		if (attr.name == 'type') {
+			itemType = attr.value;
+		}
+	}
+	folderIDsWork[itemType].push(itemId);
+}
+
+for each (var thisType in types) {
+	folderIDs.put(thisType,folderIDsWork[thisType]);
+}
+]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="types" type="Array/string" export-name="types"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="folderIDs" type="Properties" export-name="folderIDs"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="restHost">
+      <desc><![CDATA[Remote vRO REST Host]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+  </presentation>
+</workflow>

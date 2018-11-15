@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="25ca7218-8565-4b62-8453-596fd6ee251c" version="0.0.7" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Discover vCenter Clusters]]></display-name>
+  <position y="50.0" x="100.0"></position>
+  <output>
+    <param name="vCentersJSON" type="string"></param>
+  </output>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="384.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Get vCenters and their clusters]]></display-name>
+    <script encoded="false"><![CDATA[var toReturn = {};
+toReturn.vCenters = [];
+
+for each (var vCenter in VcPlugin.allSdkConnections) {
+	//get name of vCenter via API:
+	var vCenterObj = {};
+	var optionMgr = vCenter.setting;
+	vCenterObj.name = optionMgr.queryOptions("VirtualCenter.InstanceName")[0].value;
+	vCenterObj.datastoreClusters = getDsClusterNames(vCenter);
+	clusters = vCenter.allClusterComputeResources;
+	vCenterObj.clusters = [];
+	for each (cluster in clusters) {
+		vCenterObj.clusters.push(cluster.name);
+		vCenterObj['cluster_'+cluster.name] = {};
+		vCenterObj['cluster_'+cluster.name].vms = getVmNames(cluster);
+		vCenterObj['cluster_'+cluster.name].datastores = getDatastoreNames(cluster);
+	}
+	toReturn.vCenters.push(vCenterObj);
+}
+
+System.debug(JSON.stringify(toReturn,null,4));
+vCentersJSON = JSON.stringify(toReturn);
+
+
+function getVmNames(cluster) {
+	var vmNames = [];
+	var vms = System.getModule("com.vmware.library.vc.resourcePool").getAllVMsOfResourcePool(cluster.resourcePool);
+	for each (var thisVm in vms) {
+		vmNames.push(thisVm.name);
+	}
+	vmNames = vmNames.sort();
+	return vmNames;
+}
+
+function getDatastoreNames(cluster) {
+	var dsNames = [];
+	for each (var ds in cluster.datastore) {
+		dsNames.push(ds.info.name);
+	}
+	dsNames = dsNames.sort();
+	return dsNames;
+}
+
+function getDsClusterNames(vCenter) {
+	var dsClusterNames = [];
+	var folders = vCenter.getAllDatastoreFolders();
+	for each (var dsFolder in folders) {
+		System.log(dsFolder._getRef().type);
+		if (dsFolder._getRef().type == 'StoragePod') {
+			dsClusterNames.push(dsFolder.name);
+		}
+	}
+	return dsClusterNames;
+}]]></script>
+    <in-binding></in-binding>
+    <out-binding>
+      <bind name="vCentersJSON" type="string" export-name="vCentersJSON"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <presentation></presentation>
+</workflow>

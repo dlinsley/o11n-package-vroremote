@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.vmware.pso.remote</entry>
+<entry key="name">getRootPermId</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">12d344ee-9530-48ee-bfbb-bd71a888b437</entry>
+</properties>

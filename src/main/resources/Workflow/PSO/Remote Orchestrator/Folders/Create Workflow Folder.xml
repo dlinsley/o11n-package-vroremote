@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="9f146e46-0594-46f3-9f12-1af18c472fb3" version="0.0.5" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Create Workflow Folder]]></display-name>
+  <description><![CDATA[Creates a workflow folder on the remote vRO]]></description>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="restHost" type="REST:RESTHost">
+      <description><![CDATA[REST host of remote vRO]]></description>
+    </param>
+    <param name="workflowFolderPath" type="string">
+      <description><![CDATA[Workflow folder path.  Forward slash delimited.]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="newFolderId" type="string"></param>
+  </output>
+  <attrib name="wfFolderPathPartsToCreate" type="Array/string" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="existingPathId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="524.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" catch-name="item4" throw-bind-name="errorCode" type="task">
+    <display-name><![CDATA[Create missing folders]]></display-name>
+    <script encoded="false"><![CDATA[var partCount = wfFolderPathPartsToCreate.length
+var index = 0;
+
+var createFolderFromId = existingPathId;
+
+if (createFolderFromId == null) {
+	//starting from root
+	System.log('Creating folder in tree: '+wfFolderPathPartsToCreate[index]);
+	createFolderFromId = System.getModule("com.vmware.pso.remote").createRemoteWorkflowFolder(restHost,null,wfFolderPathPartsToCreate[index]);
+	index++;
+}
+
+while (index < partCount) {
+	//have an existing folder.  Create folders until we're done.
+	System.log('Creating folder in tree: '+wfFolderPathPartsToCreate[index]);
+	createFolderFromId = System.getModule("com.vmware.pso.remote").createRemoteWorkflowFolder(restHost,createFolderFromId,wfFolderPathPartsToCreate[index]);
+	index++;
+}
+
+newFolderId = createFolderFromId;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="wfFolderPathPartsToCreate" type="Array/string" export-name="wfFolderPathPartsToCreate"></bind>
+      <bind name="existingPathId" type="string" export-name="existingPathId"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="newFolderId" type="string" export-name="newFolderId"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="344.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item1" catch-name="item3" throw-bind-name="errorCode" type="task">
+    <display-name><![CDATA[Get Existing folder]]></display-name>
+    <script encoded="false"><![CDATA[System.log("Creating folder: "+workflowFolderPath);
+
+var existingFound = false;
+var wfFolderPathParts = [];
+//ensure no leading / trailing / or double //
+for each (var part in workflowFolderPath.split('/')) {
+	if (part != null && part.length > 0) {
+		wfFolderPathParts.push(part);
+	}
+}
+
+wfFolderPathPartsToCreate = [];
+existingPathId = null;
+
+while (existingFound === false && wfFolderPathParts.length > 0) {
+	existingPathId = System.getModule("com.vmware.pso.remote").remoteWorkflowFolderExists(restHost,wfFolderPathParts.join('/'));
+	if (existingPathId == null) {
+		var part = wfFolderPathParts.pop();
+		wfFolderPathPartsToCreate.unshift(part);
+	} else {
+		existingFound = true;
+	}
+}
+
+System.debug("existing workflowPathParts:  "+JSON.stringify(wfFolderPathParts, null,4));
+System.debug("workflowPathParts to create:  "+JSON.stringify(wfFolderPathPartsToCreate, null,4));
+System.debug("existingPath ID: "+existingPathId);]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="workflowFolderPath" type="string" export-name="workflowFolderPath"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="wfFolderPathPartsToCreate" type="Array/string" export-name="wfFolderPathPartsToCreate"></bind>
+      <bind name="existingPathId" type="string" export-name="existingPathId"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="109.04545454545453" x="245.0"></position>
+  </workflow-item>
+  <workflow-item name="item4" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="109.04545454545453" x="385.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="restHost">
+      <desc><![CDATA[restHost]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="workflowFolderPath">
+      <desc><![CDATA[workflowFolderPath]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+  </presentation>
+</workflow>

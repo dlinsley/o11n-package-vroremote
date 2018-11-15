@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="fec0040c-afe5-4505-94ca-7482818b58d2" version="0.0.2" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Update vCenter Inventory of Remote vRO]]></display-name>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="restHost" type="REST:RESTHost">
+      <description><![CDATA[The REST Host representing the remote vRO]]></description>
+    </param>
+  </input>
+  <attrib name="workflowObj" type="Workflow" read-only="true">
+    <value encoded="n"><![CDATA[dunes://service.dunes.ch/Workflow?id='25ca7218-8565-4b62-8453-596fd6ee251c'&dunesName='Workflow']]></value>
+  </attrib>
+  <attrib name="parameters" type="Properties" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="outputParameters" type="Properties" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="state" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[Final state of workflow:  complete, failed, canceled.]]></description>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="109.04545454545453" x="524.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item4" type="task">
+    <display-name><![CDATA[Prep inputs]]></display-name>
+    <script encoded="false"><![CDATA[
+parameters = new Properties(); //empty properties object
+]]></script>
+    <in-binding></in-binding>
+    <out-binding>
+      <bind name="parameters" type="Properties" export-name="parameters"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item5" type="link" linked-workflow-id="0656a2cf-bcb7-4534-8eaf-a80b1dc1f070">
+    <display-name><![CDATA[Call Workflow on Other vRO]]></display-name>
+    <in-binding>
+      <bind name="workflowId" type="string" explicitly-not-bound="true" export-name="NULL"></bind>
+      <bind name="parameters" type="Properties" export-name="parameters"></bind>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost">
+        <description><![CDATA[The created RESTHost]]></description>
+      </bind>
+      <bind name="workflowObj" type="Workflow" export-name="workflowObj"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="outputParameters" type="Properties" export-name="outputParameters"></bind>
+      <bind name="state" type="string" export-name="state">
+        <description><![CDATA[Final state of workflow:  complete, failed, canceled.]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Currently only supports string types for workflow inputs/outputs.]]></description>
+    <position y="55.40909090909091" x="344.5"></position>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item0" type="task">
+    <display-name><![CDATA[Set host with vCenters]]></display-name>
+    <script encoded="false"><![CDATA[var vCentersJSON = outputParameters.get("vCentersJSON");
+var vCentersObj = JSON.parse(vCentersJSON);
+
+System.log(JSON.stringify(vCentersObj,null,4));
+
+var vCenterNames = [];
+
+for each (vCenter in vCentersObj.vCenters) {
+	vCenterNames.push(vCenter.name);
+	var clusterNames = vCenter.clusters;
+	var dsClusterNames = vCenter.datastoreClusters;
+	Server.setCustomProperty(restHost,vCenter.name+"_clusters",clusterNames);
+	Server.setCustomProperty(restHost,vCenter.name+"_datastoreClusters",dsClusterNames);
+	
+	for each (var clusterName in clusterNames) {
+		var vmNames = vCenter['cluster_'+clusterName].vms
+		var dsNames = vCenter['cluster_'+clusterName].datastores;
+		Server.setCustomProperty(restHost,'cluster_'+clusterName+'_vms',vmNames.sort());
+		Server.setCustomProperty(restHost,'cluster_'+clusterName+'_datastores',dsNames.sort());
+	}	
+}
+
+Server.setCustomProperty(restHost,"remoteVRO","vCenterAccess");
+Server.setCustomProperty(restHost,"vCenters",vCenterNames);]]></script>
+    <in-binding>
+      <bind name="outputParameters" type="Properties" export-name="outputParameters"></bind>
+      <bind name="state" type="string" export-name="state"></bind>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <position y="55.40909090909091" x="484.5"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="restHost">
+      <desc><![CDATA[The REST Host representing the remote vRO]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

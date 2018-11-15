@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="remoteVCenterDatastoreClusters" result-type="Array/string" api-version="6.0.0" id="be0b40ed-d288-4b95-86e6-614ae9e23e22" version="0.0.0" allowed-operations="vef">
+  <param n="vCenter" t="string"><![CDATA[]]></param>
+  <param n="exclude" t="string"><![CDATA[(Optional) exclude this name from the list. Useful if setting a source and destination for a workflow]]></param>
+  <script encoded="false"><![CDATA[var clusters = [];
+
+for each (hostId in RESTHostManager.getHosts()) {
+	var host = RESTHostManager.getHost(hostId);
+	if ("vCenterAccess" == Server.getCustomProperty(host,"remoteVRO") && Server.getCustomProperty(host,vCenter+"_datastoreClusters")) {
+		clusters = Server.getCustomProperty(host,vCenter+"_datastoreClusters");
+		break;
+	}
+}
+if (exclude != null && exclude.length > 0) {
+	clusters = System.getModule("com.vmware.pso.remote").removeStringFromArrayByValue(clusters,exclude);
+}
+
+//add a default vault to front of array for dropdown purposes.
+if (clusters.length > 0) {
+	clusters.unshift('[---Select a Datastore Cluster---]');
+} else if (vCenter.indexOf('[---') > -1){
+	clusters.unshift('[---Select a vCenter First---]');
+} else {
+	clusters.unshift('[===NO DATASTORE CLUSTERS===]');	
+}
+return clusters;]]></script>
+</dunes-script-module>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getClusterByName" result-type="VC:ClusterComputeResource" api-version="6.0.0" id="c6faca3b-9a4b-422a-8420-3f5229bc7a3d" version="0.0.0" allowed-operations="vef">
+  <param n="clusterName" t="string"><![CDATA[]]></param>
+  <param n="vCenter" t="VC:SdkConnection"><![CDATA[Optional SDK connection.  Otherwise all known will be used]]></param>
+  <script encoded="false"><![CDATA[var found;
+if (vCenter) {
+	found = vCenter.getAllClusterComputeResources(null, "xpath:name[matches(.,'" + clusterName + "')]");
+} else {
+	found = VcPlugin.getAllClusterComputeResources(null, "xpath:name[matches(.,'" + clusterName + "')]");
+}
+if (found.length > 1) {
+	throw(clusterName+" matched more than one cluster");
+}
+if (found.length == 0) {
+	throw(clusterName+" cluster does not exist");
+}
+
+return found[0];]]></script>
+</dunes-script-module>

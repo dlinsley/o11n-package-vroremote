@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getRootPermId" result-type="string" api-version="6.0.0" id="12d344ee-9530-48ee-bfbb-bd71a888b437" version="0.0.0" allowed-operations="vef">
+  <param n="restHost" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="group" t="string"><![CDATA[]]></param>
+  <param n="groupDomain" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var req = restHost.createRequest('GET','/vco/api/server/permissions');
+req.setHeader('Accept','application/json');
+
+var response = req.execute();
+System.debug(response.statusCode);
+if (response.statusCode < 400) {
+
+} else {
+	throw response.contentAsString;
+}
+
+var principal = groupDomain+'\\'+group;
+principal = principal.toLowerCase();
+
+var permIdToReturn = null;
+
+var responseObj = JSON.parse(response.contentAsString);
+
+for each (permObj in responseObj.permissions) {
+	if (permObj.permission.principal.toLowerCase() == principal) {
+		var permId = permObj.permission.href.split('/vco/api/server/permissions/')[1];
+		permIdToReturn = permId;
+		break;
+	}
+}
+if (permIdToReturn == null) {
+	System.warn('Group '+principal+' does not appear to have any rights');
+}
+
+return permIdToReturn;]]></script>
+</dunes-script-module>

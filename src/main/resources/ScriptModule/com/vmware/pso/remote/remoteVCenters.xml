@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="remoteVCenters" result-type="Array/string" api-version="6.0.0" id="a80fbb9f-76ab-4598-a064-712e59120956" version="0.0.0" allowed-operations="vef">
+  <script encoded="false"><![CDATA[var vCenters = [];
+
+for each (hostId in RESTHostManager.getHosts()) {
+	var host = RESTHostManager.getHost(hostId);
+	if ("vCenterAccess" == Server.getCustomProperty(host,"remoteVRO")) {
+		hostVCenters = Server.getCustomProperty(host,"vCenters");
+		for each (vc in hostVCenters) {
+			vCenters.push(vc);
+		}
+	}
+}
+//add a default vault to front of array for dropdown purposes.
+vCenters.unshift('[---Select a vCenter---]');
+return vCenters;]]></script>
+</dunes-script-module>

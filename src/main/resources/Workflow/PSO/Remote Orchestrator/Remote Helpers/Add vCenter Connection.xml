@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" object-name="workflow:name=generic" id="5b65be19-4c19-45e1-9269-5c2903427e3f" version="0.0.2" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Add vCenter Connection]]></display-name>
+  <position y="45.40909090909091" x="125.0"></position>
+  <input>
+    <param name="vCenterHostname" type="string">
+      <description><![CDATA[IP or host name of the vCenter Server instance to add]]></description>
+    </param>
+    <param name="vCenterSsoUsername" type="string">
+      <description><![CDATA[User name of the user that Orchestrator will use to connect to the vCenter Server instance.]]></description>
+    </param>
+    <param name="vCenterSsoPassword" type="SecureString">
+      <description><![CDATA[Password of the user that Orchestrator will use to connect to the vCenter Server instance. (username@domain)]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="success" type="string"></param>
+  </output>
+  <attrib name="yes" type="boolean" read-only="true">
+    <value encoded="n"><![CDATA[true]]></value>
+  </attrib>
+  <attrib name="no" type="boolean" read-only="true">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+  </attrib>
+  <attrib name="path" type="string" read-only="true">
+    <value encoded="n"><![CDATA[/sdk]]></value>
+    <description><![CDATA[Location of the SDK to use to connect to the vCenter Server instance]]></description>
+  </attrib>
+  <attrib name="port" type="number" read-only="true">
+    <value encoded="n"><![CDATA[443.0]]></value>
+    <description><![CDATA[HTTPS port of the vCenter Server instance]]></description>
+  </attrib>
+  <attrib name="newInstance" type="VC:SdkConnection" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+    <description><![CDATA[Registered vCenter Server instance]]></description>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="584.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item3" type="link" linked-workflow-id="f246b7b5-fe89-4da5-a640-36ffc6874069">
+    <display-name><![CDATA[Add a vCenter Server instance]]></display-name>
+    <in-binding>
+      <bind name="enabled" type="boolean" export-name="yes">
+        <description><![CDATA[Enables this vCenter Server instance for orchestration]]></description>
+      </bind>
+      <bind name="host" type="string" export-name="vCenterHostname">
+        <description><![CDATA[IP or host name of the vCenter Server instance to add]]></description>
+      </bind>
+      <bind name="port" type="number" export-name="port">
+        <description><![CDATA[HTTPS port of the vCenter Server instance]]></description>
+      </bind>
+      <bind name="path" type="string" export-name="path">
+        <description><![CDATA[Location of the SDK to use to connect to the vCenter Server instance]]></description>
+      </bind>
+      <bind name="sessionPerUser" type="boolean" export-name="yes">
+        <description><![CDATA[Specifies the method to manage user access to the vCenter Server system. If this is set to false, the method is share a unique session.]]></description>
+      </bind>
+      <bind name="userName" type="string" export-name="vCenterSsoUsername">
+        <description><![CDATA[User name of the user that Orchestrator will use to connect to the vCenter Server instance.]]></description>
+      </bind>
+      <bind name="password" type="SecureString" export-name="vCenterSsoPassword">
+        <description><![CDATA[Password of the user that Orchestrator will use to connect to the vCenter Server instance.]]></description>
+      </bind>
+      <bind name="domain" type="string" explicitly-not-bound="true" export-name="NULL">
+        <description><![CDATA[Domain name. This is used only if method session per user is set]]></description>
+      </bind>
+      <bind name="ignoreCertificateWarnings" type="boolean" export-name="yes">
+        <description><![CDATA[If set to true,the vCenter Server instance certificate is accepted silently and the certificate is added to the trusted store]]></description>
+      </bind>
+      <bind name="httpPort" type="number" explicitly-not-bound="true" export-name="NULL">
+        <description><![CDATA[Deprecated. Not used]]></description>
+      </bind>
+      <bind name="pbmUrl" type="string" explicitly-not-bound="true" export-name="NULL">
+        <description><![CDATA[URL of PBM endpoint]]></description>
+      </bind>
+      <bind name="smsUrl" type="string" explicitly-not-bound="true" export-name="NULL">
+        <description><![CDATA[URL of SMS endpoint]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="newInstance" type="VC:SdkConnection" export-name="newInstance">
+        <description><![CDATA[Registered vCenter Server instance]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Configures Orchestrator to connect to a new vCenter Server instance, so that you can run workflows over the objects in the vSphere infrastructure.]]></description>
+    <position y="55.40909090909091" x="264.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item0" type="task">
+    <display-name><![CDATA[check result]]></display-name>
+    <script encoded="false"><![CDATA[if (newInstance != null) {
+	success = "true";
+} else {
+	success = "false - new vCenter connection was not made";
+}]]></script>
+    <in-binding>
+      <bind name="newInstance" type="VC:SdkConnection" export-name="newInstance"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="success" type="string" export-name="success"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="404.5"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="vCenterSsoUsername">
+      <desc><![CDATA[User name of the user that Orchestrator will use to connect to the vCenter Server instance.]]></desc>
+    </p-param>
+    <p-param name="vCenterSsoPassword">
+      <desc><![CDATA[Password of the user that Orchestrator will use to connect to the vCenter Server instance.]]></desc>
+    </p-param>
+    <p-param name="vCenterHostname">
+      <desc><![CDATA[IP or host name of the vCenter Server instance to add]]></desc>
+    </p-param>
+  </presentation>
+</workflow>

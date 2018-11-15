@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item2" object-name="workflow:name=generic" id="a047f838-6345-4531-b9ad-8bbc55ea73b8" version="0.0.8" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Add Remote vRO]]></display-name>
+  <position y="27.227272727272727" x="45.0"></position>
+  <input>
+    <param name="hostname" type="string">
+      <description><![CDATA[vRO FQDN]]></description>
+    </param>
+    <param name="port" type="string">
+      <description><![CDATA[vRO API Port.  Typically 8281]]></description>
+    </param>
+    <param name="connectRemoteVCenter" type="boolean"></param>
+    <param name="vCenterHostname" type="string">
+      <description><![CDATA[vCenter FQDN]]></description>
+    </param>
+    <param name="vCenterSsoUsername" type="string">
+      <description><![CDATA[vCenter SSO Admin username]]></description>
+    </param>
+    <param name="vCenterSsoPassword" type="SecureString">
+      <description><![CDATA[vCenter SSO Admin password]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="vroRestHost" type="REST:RESTHost">
+      <description><![CDATA[RestHost endpoint for remote vRO]]></description>
+    </param>
+  </output>
+  <attrib name="name" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[Host's name]]></description>
+  </attrib>
+  <attrib name="url" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+    <description><![CDATA[Host's base URL]]></description>
+  </attrib>
+  <attrib name="connectionTimeout" type="number" read-only="true">
+    <value encoded="n"><![CDATA[30.0]]></value>
+    <description><![CDATA[Connection timeout]]></description>
+  </attrib>
+  <attrib name="operationTimeout" type="number" read-only="true">
+    <value encoded="n"><![CDATA[60.0]]></value>
+    <description><![CDATA[Operation timeout]]></description>
+  </attrib>
+  <attrib name="authentication" type="string" read-only="true">
+    <value encoded="n"><![CDATA[Basic]]></value>
+    <description><![CDATA[Host's authentication type]]></description>
+  </attrib>
+  <attrib name="sessionMode" type="string" read-only="true">
+    <value encoded="n"><![CDATA[Per User Session]]></value>
+    <description><![CDATA[Session mode]]></description>
+  </attrib>
+  <attrib name="no" type="boolean" read-only="true">
+    <value encoded="n"><![CDATA[false]]></value>
+    <description><![CDATA[Use Proxy]]></description>
+  </attrib>
+  <attrib name="yes" type="boolean" read-only="true">
+    <value encoded="n"><![CDATA[true]]></value>
+    <description><![CDATA[If set to true, the certificate is accepted silently and the certificate is added to the trusted store]]></description>
+  </attrib>
+  <attrib name="proxyAuthentication" type="string" read-only="true">
+    <value encoded="n"><![CDATA[NONE]]></value>
+    <description><![CDATA[Proxy AuthenticationType]]></description>
+  </attrib>
+  <attrib name="restHost" type="REST:RESTHost" read-only="false">
+    <value encoded="n"><![CDATA[__NULL__]]></value>
+    <description><![CDATA[The created RESTHost]]></description>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="27.227272727272727" x="884.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item3" type="link" linked-workflow-id="8F8080808080808080808080808080808080808001299080088268176866967b3">
+    <display-name><![CDATA[Add a REST host]]></display-name>
+    <in-binding>
+      <bind name="name" type="string" export-name="name">
+        <description><![CDATA[Host's name]]></description>
+      </bind>
+      <bind name="url" type="string" export-name="url">
+        <description><![CDATA[Host's base URL]]></description>
+      </bind>
+      <bind name="authentication" type="string" export-name="authentication">
+        <description><![CDATA[Host's authentication type]]></description>
+      </bind>
+      <bind name="authUserName" type="string" explicitly-not-bound="true">
+        <description><![CDATA[Authentication user name]]></description>
+      </bind>
+      <bind name="authPassword" type="SecureString" explicitly-not-bound="true">
+        <description><![CDATA[Authentication password]]></description>
+      </bind>
+      <bind name="consumerKey" type="string" explicitly-not-bound="true">
+        <description><![CDATA[Consumer key]]></description>
+      </bind>
+      <bind name="consumerSecret" type="SecureString" explicitly-not-bound="true">
+        <description><![CDATA[Consumer secret]]></description>
+      </bind>
+      <bind name="accessToken" type="string" explicitly-not-bound="true">
+        <description><![CDATA[Access token]]></description>
+      </bind>
+      <bind name="accessTokenSecret" type="SecureString" explicitly-not-bound="true">
+        <description><![CDATA[Access token secret]]></description>
+      </bind>
+      <bind name="connectionTimeout" type="number" export-name="connectionTimeout">
+        <description><![CDATA[Connection timeout]]></description>
+      </bind>
+      <bind name="operationTimeout" type="number" export-name="operationTimeout">
+        <description><![CDATA[Operation timeout]]></description>
+      </bind>
+      <bind name="sessionMode" type="string" export-name="sessionMode">
+        <description><![CDATA[Session mode]]></description>
+      </bind>
+      <bind name="oauth2Token" type="string" explicitly-not-bound="true">
+        <description><![CDATA[OAuth 2.0 token]]></description>
+      </bind>
+      <bind name="workstation" type="string" explicitly-not-bound="true">
+        <description><![CDATA[Workstation  for NTLM authentication]]></description>
+      </bind>
+      <bind name="domain" type="string" explicitly-not-bound="true">
+        <description><![CDATA[Domain  for NTLM authentication]]></description>
+      </bind>
+      <bind name="useProxy" type="boolean" export-name="no">
+        <description><![CDATA[Use Proxy]]></description>
+      </bind>
+      <bind name="proxyHost" type="string" explicitly-not-bound="true">
+        <description><![CDATA[Proxy host]]></description>
+      </bind>
+      <bind name="proxyPort" type="number" explicitly-not-bound="true">
+        <description><![CDATA[Proxy port]]></description>
+      </bind>
+      <bind name="ignoreWarnings" type="boolean" export-name="yes">
+        <description><![CDATA[If set to true, the certificate is accepted silently and the certificate is added to the trusted store]]></description>
+      </bind>
+      <bind name="hostVerification" type="boolean" export-name="no">
+        <description><![CDATA[Verify whether the target hostname matches the names stored inside the server's X.509 certificate]]></description>
+      </bind>
+      <bind name="key" type="Configurator:Key" explicitly-not-bound="true">
+        <description><![CDATA[The PrivateKeyEntry to use for client certificate authentication.]]></description>
+      </bind>
+      <bind name="proxyAuthentication" type="string" export-name="proxyAuthentication">
+        <description><![CDATA[Proxy AuthenticationType]]></description>
+      </bind>
+      <bind name="proxyAuthUserName" type="string" explicitly-not-bound="true">
+        <description><![CDATA[Proxy user name]]></description>
+      </bind>
+      <bind name="proxyAuthPassword" type="SecureString" explicitly-not-bound="true">
+        <description><![CDATA[Proxy password]]></description>
+      </bind>
+      <bind name="proxySessionMode" type="string" explicitly-not-bound="true">
+        <description><![CDATA[Proxy Session mode]]></description>
+      </bind>
+      <bind name="autoUrlRedirection" type="boolean" export-name="yes">
+        <description><![CDATA[Automatically URL redirection]]></description>
+      </bind>
+      <bind name="parallelRequestExecution" type="boolean" export-name="no"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost">
+        <description><![CDATA[The created RESTHost]]></description>
+      </bind>
+    </out-binding>
+    <description><![CDATA[Adds a REST host to the plug-in's inventory.]]></description>
+    <position y="91.77272727272727" x="284.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" out-name="item6" type="task">
+    <display-name><![CDATA[Prep inputs]]></display-name>
+    <script encoded="false"><![CDATA[name = hostname;
+url = "https://"+hostname;
+
+if (port.length > 0) {
+	url = url+":"+port;	
+}
+
+//Check if RESTHost already exists by name:
+
+var hosts = RESTHostManager.getHosts();
+for each (hostId in hosts) {
+	if (RESTHostManager.getHost(hostId).name == name) {
+		System.log("REST host already exists");
+		restHost = RESTHostManager.getHost(hostId);
+	}
+}]]></script>
+    <in-binding>
+      <bind name="hostname" type="string" export-name="hostname"></bind>
+      <bind name="port" type="string" export-name="port"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="name" type="string" export-name="name"></bind>
+      <bind name="url" type="string" export-name="url"></bind>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+    </out-binding>
+    <position y="37.22727272727273" x="144.5"></position>
+  </workflow-item>
+  <workflow-item name="item6" out-name="item3" type="condition" alt-out-name="item1" comparator="0">
+    <display-name><![CDATA[Already Created?]]></display-name>
+    <script encoded="false"><![CDATA[//Generated by the system, cannot be edited
+return (restHost  != null ) ;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+    </in-binding>
+    <condition name="restHost" type="REST:RESTHost" comparator="0" label="null"></condition>
+    <position y="27.227272727272727" x="284.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item5" type="link" linked-workflow-id="fec0040c-afe5-4505-94ca-7482818b58d2">
+    <display-name><![CDATA[Update vCenter Inventory of Remote vRO]]></display-name>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost">
+        <description><![CDATA[The created RESTHost]]></description>
+      </bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <position y="37.22727272727273" x="405.0"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item0" type="task">
+    <display-name><![CDATA[Set Outputs]]></display-name>
+    <script encoded="false"><![CDATA[vroRestHost = restHost;]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="vroRestHost" type="REST:RESTHost" export-name="vroRestHost"></bind>
+    </out-binding>
+    <position y="37.22727272727273" x="684.5"></position>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item7" type="condition" alt-out-name="item4" comparator="0">
+    <display-name><![CDATA[Connect a vCenter?]]></display-name>
+    <script encoded="false"><![CDATA[//Generated by the system, cannot be edited
+return (connectRemoteVCenter == true) ;]]></script>
+    <in-binding>
+      <bind name="connectRemoteVCenter" type="boolean" export-name="connectRemoteVCenter"></bind>
+    </in-binding>
+    <condition name="connectRemoteVCenter" type="boolean" comparator="0" label="null">false</condition>
+    <position y="27.227272727272727" x="544.5"></position>
+  </workflow-item>
+  <workflow-item name="item7" out-name="item4" type="link" linked-workflow-id="9afb6690-c37a-4777-acda-4ec56dd0209d">
+    <display-name><![CDATA[Connect Remote Orchestrator to a vCenter]]></display-name>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost">
+        <description><![CDATA[REST Host of remote vRO]]></description>
+      </bind>
+      <bind name="vCenterHostname" type="string" export-name="vCenterHostname"></bind>
+      <bind name="vCenterSsoUsername" type="string" export-name="vCenterSsoUsername"></bind>
+      <bind name="vCenterSsoPassword" type="SecureString" export-name="vCenterSsoPassword"></bind>
+    </in-binding>
+    <out-binding></out-binding>
+    <description><![CDATA[Connects a remote vRO to a vCenter.
+
+Assumes default api port for vCenter.
+
+Assumes session per user authentication to vCenter.
+
+Accepts the vCenter certificate.]]></description>
+    <position y="91.77272727272727" x="545.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-step>
+      <title><![CDATA[Remote vRO]]></title>
+      <p-param name="hostname">
+        <desc><![CDATA[<b>vRO Hostname</b>
+FQDN of remote vRO]]></desc>
+        <p-qual kind="static" name="inetAddress" type="String"><![CDATA[Host name or IP address]]></p-qual>
+        <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+      </p-param>
+      <p-param name="port">
+        <desc><![CDATA[<b>vRO API Port</b>
+Typically: 8281]]></desc>
+        <p-qual kind="static" name="defaultValue" type="string"><![CDATA[8281]]></p-qual>
+        <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+      </p-param>
+      <p-param name="connectRemoteVCenter">
+        <desc><![CDATA[<b>Connect remote vCenter?</b>
+Should this remote vRO connect to a vCenter with per user authentication?]]></desc>
+      </p-param>
+    </p-step>
+    <p-step>
+      <title><![CDATA[Remote vCenter]]></title>
+      <p-qual kind="ognl" name="visible" type="boolean"><![CDATA[#connectRemoteVCenter]]></p-qual>
+      <p-param name="vCenterHostname">
+        <desc><![CDATA[<b>vCenter Hostname</b>
+FQDN to the remote vCenter]]></desc>
+        <p-qual kind="ognl" name="mandatory" type="boolean"><![CDATA[#connectRemoteVCenter]]></p-qual>
+      </p-param>
+      <p-param name="vCenterSsoUsername">
+        <desc><![CDATA[<b>vCenter SSO Username</b>]]></desc>
+        <p-qual kind="ognl" name="mandatory" type="boolean"><![CDATA[#connectRemoteVCenter]]></p-qual>
+      </p-param>
+      <p-param name="vCenterSsoPassword">
+        <desc><![CDATA[<b>vCenter SSO Password</b>]]></desc>
+        <p-qual kind="ognl" name="mandatory" type="boolean"><![CDATA[#connectRemoteVCenter]]></p-qual>
+      </p-param>
+    </p-step>
+  </presentation>
+</workflow>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getVCsdkConnectionByName" result-type="VC:SdkConnection" api-version="6.0.0" id="90bc8d0d-22f2-48bf-864f-936c30cdd7ad" version="0.0.0" allowed-operations="vef">
+  <param n="vcName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[for each (var vCenter in VcPlugin.allSdkConnections) {
+	//get name of vCenter via API:
+	var optionMgr = vCenter.setting;
+	if (optionMgr == null) {
+		System.error("Expected to get an OptionManager from "+vCenter);
+	}
+	if (vcName == optionMgr.queryOptions("VirtualCenter.InstanceName")[0].value) {
+		return vCenter;
+	}
+}
+throw("Could not determine vCenter SDK connection for vCenter named: "+vcName);]]></script>
+</dunes-script-module>

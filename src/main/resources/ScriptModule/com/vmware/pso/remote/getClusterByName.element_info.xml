@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.vmware.pso.remote</entry>
+<entry key="name">getClusterByName</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">c6faca3b-9a4b-422a-8420-3f5229bc7a3d</entry>
+</properties>

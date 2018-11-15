@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getStoragePodByName" result-type="VC:StoragePod" api-version="6.0.0" id="3fbe8f42-2429-4d30-bc3b-78db16fa0f37" version="0.0.0" allowed-operations="vef">
+  <param n="vCenter" t="VC:SdkConnection"><![CDATA[]]></param>
+  <param n="storagePodName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var found;
+if (vCenter) {
+	found = vCenter.getAllVimManagedObjects('StoragePod', null, "xpath:name[matches(.,'" + storagePodName + "')]");
+} else {
+	found = VcPlugin.getAllVimManagedObjects('StoragePod',null, "xpath:name[matches(.,'" + storagePodName + "')]");
+}
+if (found.length > 1) {
+	throw(storagePodName+" matched more than one StoragePod");
+}
+if (found.length == 0) {
+	throw(storagePodName+" StoragePod does not exist");
+}
+return found[0];
+]]></script>
+</dunes-script-module>

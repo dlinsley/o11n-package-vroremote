@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="createRemoteWorkflowFolder" result-type="string" api-version="6.0.0" id="ed9804f4-16a6-4863-bb12-3e204f280116" version="0.0.0" allowed-operations="vef">
+  <param n="rest" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="rootId" t="string"><![CDATA[parent Id.  if null, will create folder in root]]></param>
+  <param n="name" t="string"><![CDATA[Folder Name]]></param>
+  <script encoded="false"><![CDATA[var bodyObj = {};
+bodyObj.type = 'WorkflowCategory';
+bodyObj.description = '';
+bodyObj.name = name;
+var req;
+if (rootId == null) {
+	req = rest.createRequest('POST','/vco/api/categories',JSON.stringify(bodyObj));
+} else {
+	req = rest.createRequest('POST','/vco/api/categories/'+rootId,JSON.stringify(bodyObj));
+}
+req.contentType = 'application/json';
+req.setHeader('Accept','application/json');
+var executed = false;
+while (!executed) {
+	var response = req.execute();
+	executed = true;
+	System.debug('Response Code: '+response.statusCode);
+	if (response.statusCode < 400) {
+		var responseObj = JSON.parse(response.contentAsString);
+		return responseObj.id;
+	} else if (response.statusCode == 503) {
+		//node not active, try again later 15 seconds later.
+		System.log("Remote vRO not ready.  Will try again.");
+		executed = false;
+		System.sleep(30000+Math.random()*1000);
+	} else {
+		throw response.contentAsString;	
+	}
+}]]></script>
+</dunes-script-module>

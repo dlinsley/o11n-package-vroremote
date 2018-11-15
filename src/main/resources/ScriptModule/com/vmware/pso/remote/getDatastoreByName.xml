@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getDatastoreByName" result-type="VC:Datastore" api-version="6.0.0" id="0fb78eda-7a8d-4335-84bd-8827f87c577f" version="0.0.0" allowed-operations="vef">
+  <param n="vCenter" t="VC:SdkConnection"><![CDATA[]]></param>
+  <param n="datastoreName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var found;
+if (vCenter) {
+	found = vCenter.getAllDatastores(null, "xpath:info/name[matches(.,'" + datastoreName + "')]");
+} else {
+	found = VcPlugin.getAllDatastores(null, "xpath:info/name[matches(.,'" + datastoreName + "')]");
+}
+if (found.length > 1) {
+	throw(datastoreName+" matched more than one datastore");
+}
+if (found.length == 0) {
+	throw(datastoreName+" datastore does not exist");
+}
+
+return found[0];]]></script>
+</dunes-script-module>

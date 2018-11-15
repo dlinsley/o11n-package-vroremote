@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item4" object-name="workflow:name=generic" id="8f7b006b-63da-40d3-8390-5ae583842495" version="0.0.0" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+  <display-name><![CDATA[Remove Workflow Folder Permissions on Remote vRO]]></display-name>
+  <position y="50.0" x="100.0"></position>
+  <input>
+    <param name="restHost" type="REST:RESTHost">
+      <description><![CDATA[Remote vRO REST Host]]></description>
+    </param>
+    <param name="workflowFolderPath" type="string">
+      <description><![CDATA[Target workflow folder for permission.  If workflow folder does not exist, it will be created.  Forward slash (/) delimited]]></description>
+    </param>
+  </input>
+  <output>
+    <param name="permissions" type="Properties"></param>
+  </output>
+  <attrib name="workflowCatId" type="string" read-only="false">
+    <value encoded="n"><![CDATA[]]></value>
+  </attrib>
+  <attrib name="errorCode" type="string" read-only="false">
+    <value encoded="n"><![CDATA[Folder does not exist]]></value>
+  </attrib>
+  <workflow-item name="item0" type="end" end-mode="0">
+    <position y="45.40909090909091" x="664.5"></position>
+  </workflow-item>
+  <workflow-item name="item1" out-name="item0" type="task">
+    <display-name><![CDATA[Get Permission]]></display-name>
+    <script encoded="false"><![CDATA[permissions = new Properties();
+var req = restHost.createRequest('GET','/vco/api/categories/'+workflowCatId+'/permissions');
+req.contentType = 'application/json';
+req.setHeader('Accept','application/json');
+
+var response = req.execute();
+System.debug(response.statusCode);
+var responseObj;
+if (response.statusCode < 400) {
+	responseObj = JSON.parse(response.contentAsString);
+} else {
+	throw response.contentAsString;
+}
+
+for each (var perm in responseObj.permissions) {
+//	System.log(JSON.stringify(perm,null,4));
+	var principalParts = perm.permission.principal.split('\\');
+	permissions.put(principalParts[1]+'@'+principalParts[0],perm.permission.rights);
+}
+
+//System.log(permissions.toSource());]]></script>
+    <in-binding>
+      <bind name="restHost" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="workflowCatId" type="string" export-name="workflowCatId"></bind>
+    </in-binding>
+    <out-binding>
+      <bind name="permissions" type="Properties" export-name="permissions"></bind>
+    </out-binding>
+    <position y="55.40909090909091" x="484.5"></position>
+  </workflow-item>
+  <workflow-item name="item3" out-name="item1" type="custom-condition" alt-out-name="item5">
+    <display-name><![CDATA[Folder Exists?]]></display-name>
+    <script encoded="false"><![CDATA[if (workflowCatId == 'notfound') {
+	return false;
+}
+if (workflowCatId != null && workflowCatId.length > 0) {
+	return true;
+}
+return false;]]></script>
+    <in-binding>
+      <bind name="workflowCatId" type="string" export-name="workflowCatId"></bind>
+    </in-binding>
+    <position y="45.40909090909091" x="344.5"></position>
+  </workflow-item>
+  <workflow-item name="item4" out-name="item3" type="task" script-module="com.vmware.pso.remote/remoteWorkflowFolderExists">
+    <display-name><![CDATA[remoteWorkflowFolderExists]]></display-name>
+    <script encoded="false"><![CDATA[//Auto generated script, cannot be modified !
+actionResult = System.getModule("com.vmware.pso.remote").remoteWorkflowFolderExists(rest,path) ;]]></script>
+    <in-binding>
+      <bind name="rest" type="REST:RESTHost" export-name="restHost"></bind>
+      <bind name="path" type="string" export-name="workflowFolderPath">
+        <description><![CDATA[Worflow Folder path from root delimited with /]]></description>
+      </bind>
+    </in-binding>
+    <out-binding>
+      <bind name="actionResult" type="string" export-name="workflowCatId"></bind>
+    </out-binding>
+    <description><![CDATA[Queries remote vRO if workflow folder (WorkflowCategory) exists.
+If it exists, returns the id of the respective WorkflowCategory
+If it does not exists, returns null.
+retries after 30 seconds for 503 errors
+Throws exception on unknown errors.]]></description>
+    <position y="55.40909090909091" x="204.5"></position>
+  </workflow-item>
+  <workflow-item name="item2" throw-bind-name="errorCode" type="end" end-mode="1">
+    <position y="109.04545454545453" x="545.0"></position>
+  </workflow-item>
+  <workflow-item name="item5" out-name="item2" type="task">
+    <display-name><![CDATA[No Folder]]></display-name>
+    <script encoded="false"><![CDATA[errorCode = 'Folder does not exist';]]></script>
+    <in-binding></in-binding>
+    <out-binding>
+      <bind name="errorCode" type="string" export-name="errorCode"></bind>
+    </out-binding>
+    <position y="119.04545454545453" x="345.0"></position>
+  </workflow-item>
+  <presentation>
+    <p-param name="restHost">
+      <desc><![CDATA[Remote vRO REST Host]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+    <p-param name="workflowFolderPath">
+      <desc><![CDATA[Target workflow folder for permission.  If workflow folder does not exist, the workflow will end with error.  Forward slash (/) delimited]]></desc>
+      <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
+    </p-param>
+  </presentation>
+</workflow>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.vmware.pso.remote</entry>
+<entry key="name">getDatastoreByName</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">0fb78eda-7a8d-4335-84bd-8827f87c577f</entry>
+</properties>

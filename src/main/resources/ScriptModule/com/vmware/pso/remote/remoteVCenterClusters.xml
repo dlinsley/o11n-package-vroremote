@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="remoteVCenterClusters" result-type="Array/string" api-version="6.0.0" id="af23c081-f9fe-49cf-97c4-c78774e784aa" version="0.0.0" allowed-operations="vef">
+  <param n="vCenter" t="string"><![CDATA[]]></param>
+  <param n="exclude" t="string"><![CDATA[(Optional) Exclude this name from the list. Useful if selecting a source and destination in a workflow]]></param>
+  <script encoded="false"><![CDATA[var clusters = [];
+
+for each (hostId in RESTHostManager.getHosts()) {
+	var host = RESTHostManager.getHost(hostId);
+	if ("vCenterAccess" == Server.getCustomProperty(host,"remoteVRO") && Server.getCustomProperty(host,vCenter+"_clusters")) {
+		clusters = Server.getCustomProperty(host,vCenter+"_clusters");
+		break;
+	}
+}
+
+if (exclude != null && exclude.length > 0) {
+	clusters = System.getModule("com.vmware.pso.remote").removeStringFromArrayByValue(clusters,exclude);
+}
+
+//add a default vault to front of array for dropdown purposes.
+if (clusters.length > 0) {
+	clusters.unshift('[---Select a Compute Cluster---]');
+} else {
+	clusters.unshift('[---Please Select a vCenter First---]');
+}
+return clusters;]]></script>
+</dunes-script-module>

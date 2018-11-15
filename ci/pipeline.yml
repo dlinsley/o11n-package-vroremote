@@ -1,0 +1,67 @@
+---
+resources:
+ - name: o11n-package-vroremote-repo
+   type: git
+   source:
+     uri: git@github.com:dlinsley/o11n-package-vroremote
+     branch: master
+     private_key: ((private-repo-key))
+     paths: ['ci','src']
+
+ - name: o11n-package-vroremote-version
+   type: semver
+   source:
+     driver: s3
+     bucket: concourse
+     key: o11n-package-vroremote
+     access_key_id: ((s3-access-key))
+     secret_access_key: ((s3-secret-key))
+     endpoint: ((s3-endpoint))
+     disable_ssl: true
+     
+ - name: gh-release
+   type: github-release
+   source:
+     owner: dlinsley
+     repository: o11n-package-vroremote
+     access_token: ((github-access-token))
+     pre_release: true
+     release: false
+
+jobs:
+ - name: build-packages
+   public: true
+   serial: true
+   plan:
+   - get: o11n-package-vroremote-repo
+     trigger: true
+   - get: o11n-package-vroremote-version
+     params:
+       bump: patch
+   - task: build
+     config:
+       platform: linux
+       image_resource:
+         type: docker-image
+         source:
+           repository: ((harbor-host))/library/o11n-maven
+           username: ((harbor-user.username))
+           password: ((harbor-user.password))
+           insecure_registries: [((harbor-host))]
+           tag: 7.4.0
+       inputs:
+         - name: o11n-package-vroremote-repo
+         - name: o11n-package-vroremote-version
+       outputs:
+         - name: dist
+       run:
+         path: o11n-package-vroremote-repo/ci/build-packages/build.sh
+
+   - put: gh-release
+     params:
+       name: o11n-package-vroremote-version/version
+       tag: o11n-package-vroremote-version/version
+       globs: ['dist/*.package']
+   - put: o11n-package-vroremote-version
+     params:
+       file: o11n-package-vroremote-version/version

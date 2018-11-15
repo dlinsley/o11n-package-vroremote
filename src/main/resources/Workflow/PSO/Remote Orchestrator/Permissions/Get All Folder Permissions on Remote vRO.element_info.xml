@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">PSO.Remote Orchestrator.Permissions</entry>
+<entry key="name">Get All Folder Permissions on Remote vRO</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">10c45793-efbd-4eb8-9bc9-7aa99ae7a0ee</entry>
+</properties>

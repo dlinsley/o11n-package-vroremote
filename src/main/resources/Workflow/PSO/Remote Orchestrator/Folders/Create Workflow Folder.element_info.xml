@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">PSO.Remote Orchestrator.Folders</entry>
+<entry key="name">Create Workflow Folder</entry>
+<entry key="type">Workflow</entry>
+<entry key="id">9f146e46-0594-46f3-9f12-1af18c472fb3</entry>
+</properties>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="removeStringFromArrayByValue" result-type="Array/string" api-version="6.0.0" id="0959e6fc-1520-4ee6-a232-95b084d4e99c" version="0.0.0" allowed-operations="vef">
+  <description><![CDATA[Removes a string from an array of strings by value.
+Does not account for duplicate values in the array.]]></description>
+  <param n="aStrings" t="Array/string"><![CDATA[]]></param>
+  <param n="toRemove" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[// VMware vRealize Orchestrator action sample
+// 
+// Removes a string from an array of strings by value.
+// Does not account for duplicate values in the array.
+//
+//Action Inputs:
+// aStrings  -  Array/String
+// toRemove  -  String
+//
+//Return type: Array/String
+
+//find and remove 'toRemove' in the 'aStrings' array
+var foundAt = null;
+for (var i = 0; i < aStrings.length; i++) {
+    if (aStrings[i] == toRemove) {
+        foundAt = i;
+        break;
+    }
+}
+
+if (foundAt != null) {
+    aStrings.splice(foundAt,1);
+}
+return aStrings;]]></script>
+</dunes-script-module>

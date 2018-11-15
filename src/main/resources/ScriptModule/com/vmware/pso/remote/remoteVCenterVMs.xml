@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="remoteVCenterVMs" result-type="Array/string" api-version="6.0.0" id="02954848-3e93-4b9d-a6ca-97c1869b87bc" version="0.0.0" allowed-operations="vef">
+  <param n="vCenter" t="string"><![CDATA[]]></param>
+  <param n="clusterName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var vms = [];
+
+for each (hostId in RESTHostManager.getHosts()) {
+	var host = RESTHostManager.getHost(hostId);
+	if ("vCenterAccess" == Server.getCustomProperty(host,"remoteVRO")
+			&& Server.getCustomProperty(host,vCenter+"_clusters")
+			&& Server.getCustomProperty(host,'cluster_'+clusterName+'_vms')) {
+		vms = Server.getCustomProperty(host,'cluster_'+clusterName+'_vms');
+		break;
+	}
+}
+//add a default vault to front of array for dropdown purposes.
+if (vms.length > 0) {
+	vms.unshift('[---Select a VM---]');
+} else {
+	vms.unshift('[---Please Select a vCenter and Compute Cluster First---]');
+}
+return vms;]]></script>
+</dunes-script-module>

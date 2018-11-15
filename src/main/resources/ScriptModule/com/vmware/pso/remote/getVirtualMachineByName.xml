@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getVirtualMachineByName" result-type="VC:VirtualMachine" api-version="6.0.0" id="b2a219b9-06ee-4c80-b0ff-71d7269a8d0d" version="0.0.0" allowed-operations="vef">
+  <param n="vCenter" t="VC:SdkConnection"><![CDATA[Optional SDK connection.  Otherwise all known will be used]]></param>
+  <param n="vmName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var found;
+if (vCenter) {
+	found = vCenter.getAllVirtualMachines(null, "xpath:name[matches(.,'" + vmName + "')]");
+} else {
+	found = VcPlugin.getAllVirtualMachines(null, "xpath:name[matches(.,'" + vmName + "')]");
+}
+if (found.length > 1) {
+	throw(vmName+" matched more than one VM");
+}
+if (found.length == 0) {
+	throw(vmName+" VM does not exist");
+}
+
+return found[0];]]></script>
+</dunes-script-module>

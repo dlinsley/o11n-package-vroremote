@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="executeRemoteBooleanAction" result-type="boolean" api-version="6.0.0" id="9d802905-052e-4712-84b1-6201f075bcbf" version="0.0.0" allowed-operations="vef">
+  <param n="vCenter" t="string"><![CDATA[]]></param>
+  <param n="actionModule" t="string"><![CDATA[]]></param>
+  <param n="actionName" t="string"><![CDATA[]]></param>
+  <param n="inputs" t="Properties"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var restHost = System.getModule("com.vmware.pso.remote").remoteVCenterVroRestHost(vCenter);
+var bodyObj = {};
+bodyObj.parameters = [];
+
+for each (var key in inputs.keys) {
+	var input = {};
+	input.type = 'string';
+	input.name = key;
+	input.value = {};
+	input.value.string = {};
+	input.value.string.value = inputs.get(key);
+	bodyObj.parameters.push(input); 
+}
+
+var request = restHost.createRequest('POST','/vco/api/actions/'+actionModule+'/'+actionName+'/executions',JSON.stringify(bodyObj));
+request.contentType = "application/json";
+request.setHeader("Accept","application/json");
+
+var response = request.execute();
+var responseObj;
+if (response.statusCode < 400) {
+	responseObj = JSON.parse(response.contentAsString);
+	System.log(response.contentAsString);
+} else {
+	throw response.contentAsString;
+}
+
+
+
+//confirm return value is boolean:
+if (responseObj.type == 'boolean') {
+	return responseObj.value.boolean.value;
+}
+]]></script>
+</dunes-script-module>

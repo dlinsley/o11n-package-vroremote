@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>Exported from [server]</comment>
+<entry key="categoryPath">com.vmware.pso.remote</entry>
+<entry key="name">getVirtualMachineByName</entry>
+<entry key="type">ScriptModule</entry>
+<entry key="id">b2a219b9-06ee-4c80-b0ff-71d7269a8d0d</entry>
+</properties>

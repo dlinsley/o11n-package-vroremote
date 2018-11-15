@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="remoteWorkflowFolderExists" result-type="string" api-version="6.0.0" id="be41274d-3c24-4102-b81b-7924b7c218f2" version="0.0.0" allowed-operations="vef">
+  <description><![CDATA[Queries remote vRO if workflow folder (WorkflowCategory) exists.
+If it exists, returns the id of the respective WorkflowCategory
+If it does not exists, returns null.
+retries after 30 seconds for 503 errors
+Throws exception on unknown errors.]]></description>
+  <param n="rest" t="REST:RESTHost"><![CDATA[]]></param>
+  <param n="path" t="string"><![CDATA[Worflow Folder path from root delimited with /]]></param>
+  <script encoded="false"><![CDATA[var req = rest.createRequest('GET','/vco/api/inventory/System/Workflows/'+encodeURI(path));
+req.setHeader('Accept','application/json');
+var executed = false;
+while (!executed) {
+	var response = req.execute();
+	executed = true;
+	System.debug('Response Code: '+ response.statusCode);
+	if (response.statusCode < 400) {
+		var responseObj = JSON.parse(response.contentAsString);
+		for each (var attr in responseObj.attributes) {
+			if (attr.name == 'id') {
+				return attr.value;
+			}
+		}
+	} else if (response.statusCode == 404) {
+		//expected if does not exists
+		return null;
+	} else if (response.statusCode == 503) {
+		//node not active, try again later 15 seconds later.
+		System.log("Remote vRO not ready.  Will try again.");
+		executed = false;
+		System.sleep(30000+Math.random()*1000);
+	} else {
+		throw response.contentAsString;	
+	}
+}]]></script>
+</dunes-script-module>

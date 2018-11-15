@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="remoteVCenterDatastores" result-type="Array/string" api-version="6.0.0" id="c02da077-18ea-456f-9e5a-13bebcba27f4" version="0.0.0" allowed-operations="vef">
+  <param n="vCenter" t="string"><![CDATA[]]></param>
+  <param n="clusterName" t="string"><![CDATA[]]></param>
+  <param n="exclude" t="string"><![CDATA[(Optional) Exclude this name from the list. Useful if selecting a source and destination in a workflow]]></param>
+  <script encoded="false"><![CDATA[var dsNames = [];
+
+for each (hostId in RESTHostManager.getHosts()) {
+	var host = RESTHostManager.getHost(hostId);
+	if ("vCenterAccess" == Server.getCustomProperty(host,"remoteVRO")
+			&& Server.getCustomProperty(host,vCenter+"_clusters")
+			&& Server.getCustomProperty(host,'cluster_'+clusterName+'_datastores')) {
+		dsNames = Server.getCustomProperty(host,'cluster_'+clusterName+'_datastores');
+		break;
+	}
+}
+
+if (exclude != null && exclude.length > 0) {
+	dsNames = System.getModule("com.vmware.pso.remote").removeStringFromArrayByValue(dsNames,exclude);
+}
+
+//add a default vault to front of array for dropdown purposes.
+if (dsNames.length > 0) {
+	dsNames.unshift('[---Select a Datastore---]');
+} else {
+	dsNames.unshift('[---Please Select a vCenter and Compute Cluster First---]');
+}
+return dsNames;]]></script>
+</dunes-script-module>

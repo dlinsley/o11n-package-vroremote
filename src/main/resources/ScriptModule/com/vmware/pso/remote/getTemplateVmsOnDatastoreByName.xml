@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dunes-script-module name="getTemplateVmsOnDatastoreByName" result-type="Array/string" api-version="6.0.0" id="a2dc3749-3bc6-433c-bdf6-036e2efe7f19" version="0.0.0" allowed-operations="vef">
+  <param n="vCenterName" t="string"><![CDATA[]]></param>
+  <param n="datastoreName" t="string"><![CDATA[]]></param>
+  <script encoded="false"><![CDATA[var templateVMs = [];
+var vCenter;
+if (vCenterName) {
+	vCenter = System.getModule("com.vmware.pso.remote").getVCsdkConnectionByName(vCenterName);
+}
+var datastore = System.getModule("com.vmware.pso.remote").getDatastoreByName(vCenter,datastoreName)
+for each (var vm in datastore.vm) {
+	if (vm.config.template == true) {
+		//This is a template VM
+		templateVMs.push(vm.name);
+	}
+}
+
+return templateVMs;]]></script>
+</dunes-script-module>
