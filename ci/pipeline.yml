@@ -56,6 +56,8 @@ jobs:
          - name: dist
        run:
          path: o11n-package-vroremote-repo/ci/build-packages/build.sh
+       params:
+         VCO_VERSION: 7.4.0
 
    - put: gh-release
      params:
